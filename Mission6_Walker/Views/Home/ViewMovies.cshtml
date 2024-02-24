@@ -1,0 +1,42 @@
+﻿@{
+    ViewData["Title"] = "Movies";
+}
+
+@model List<Mission6_Walker.Models.Movies>
+
+<h1>Movie Database</h1>
+
+<table class="table">
+    <thead class="thead-dark">
+        <tr>
+            <td>Title</td>
+            <td>Year</td>
+            <td>Director</td>
+            <td>Rating</td>
+            <td>Edited</td>
+            <td>Lent To</td>
+            <td>Copied To Plex</td>
+            <td>Notes</td>
+            <td></td> 
+            <td></td>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var movie in Model)
+        {
+            <tr>
+                <td>@movie.Title</td>
+                <td>@movie.Year</td>
+                <td>@movie.Director</td>
+                <td>@movie.Rating</td>
+                <td>@(movie.Edited ? "Yes" : "No")</td>
+                <td>@(string.IsNullOrEmpty(movie.LentTo) ? "N/A" : movie.LentTo)</td>
+                <td>@(movie.CopiedToPlex ? "Yes" : "No")</td>
+                <td>@(string.IsNullOrEmpty(movie.Notes) ? "N/A" : movie.Notes)</td>
+                <td><a asp-controller="Home" asp-action="Edit" asp-route-id="@movie.MovieId" class="btn btn-primary">Edit</a></td>
+                <td><a asp-controller="Home" asp-action="Delete" asp-route-id="@movie.MovieId" class="btn btn-danger">Delete</a></td>
+            </tr>
+        }
+    </tbody>
+</table>

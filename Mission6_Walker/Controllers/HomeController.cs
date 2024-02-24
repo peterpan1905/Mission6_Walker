@@ -9,10 +9,10 @@ namespace Mission6_Walker.Controllers
         private readonly ILogger<HomeController> _logger;
         private Mission6ApplicationContext _context;
 
-        public HomeController(ILogger<HomeController> logger, Mission6ApplicationContext application)
+        public HomeController(ILogger<HomeController> logger, Mission6ApplicationContext movie)
         {
             _logger = logger;
-            _context = application;
+            _context = movie;
         }
 
         public IActionResult Index()
@@ -25,27 +25,87 @@ namespace Mission6_Walker.Controllers
             return View(); 
         }
 
+        public IActionResult ViewMovies() 
+        {
+            var movies = _context.Movies.OrderBy(x => x.Title).ToList();
+
+            return View(movies); 
+        }
+
         [HttpGet]
         public IActionResult AddMovie()
         {
-            return View();
+            ViewBag.Categories = _context.Categories.ToList();
+
+            return View("AddMovie", new Movies());
         }
 
         [HttpPost]
-        public IActionResult AddMovie(AddMovie response)
+        public IActionResult AddMovie(Movies response)
         {
-            _context.Movies.Add(response); // Add the movie to the database
-            _context.SaveChanges();
+            // Check that the data is correct. If not, send them back to the form to add a movie
+            if (ModelState.IsValid)
+            {
+                _context.Movies.Add(response); // Add the movie to the database
+                _context.SaveChanges();
 
-            return View("Confirmation", response);
-        } 
+                ViewData["MovieTitle"] = response.Title;
 
-        public IActionResult Confirmation()
-        {
-            return View();
+                return View("Confirmation", response);
+            }
+            else
+            {
+                ViewBag.Categories = _context.Categories.ToList();
+                return View(response);
+            }
         }
 
-        public IActionResult Privacy()
+        [HttpGet]
+        public IActionResult Edit(int id)
+        {
+            var movieToEdit = _context.Movies.Single(x => x.MovieId == id);
+
+            ViewBag.Categories = _context.Categories.ToList();
+
+            return View("AddMovie", movieToEdit);
+        }
+
+        [HttpPost]
+        public IActionResult Edit(Movies updatedInfo)
+        {
+            // Check that the data is correct. If not, send them back to the form to edit
+            if (ModelState.IsValid) 
+            {
+                _context.Update(updatedInfo); // Edit the movie info in database
+                _context.SaveChanges();
+
+                return RedirectToAction("ViewMovies");
+            }
+            else
+            {
+                ViewBag.Categories = _context.Categories.ToList();
+                return View("AddMovie", updatedInfo);
+            }
+        }
+
+        [HttpGet]
+        public IActionResult Delete(int id)
+        {
+            var movieToDelete = _context.Movies.Single(x => x.MovieId == id);
+
+            return View(movieToDelete);
+        }
+
+        [HttpPost]
+        public IActionResult Delete(Movies movie)
+        {
+            _context.Movies.Remove(movie); // Delete the movie from the database
+            _context.SaveChanges();
+
+            return RedirectToAction("ViewMovies");
+        }
+
+        public IActionResult Confirmation()
         {
             return View();
         }
